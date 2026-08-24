@@ -2,7 +2,7 @@
 
 This is an n8n community node. It lets you use [Sendy](https://sendy.co.il) in your n8n workflows.
 
-Sendy is a credit-based SMS marketing platform for the Israeli market — send SMS and manage contacts, segments and senders from your automations.
+Sendy is a credit-based SMS marketing platform for the Israeli market — send SMS, read the replies people send back to your virtual number, and manage contacts, segments and senders from your automations.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
@@ -30,6 +30,8 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 | **Sender** | Get Many | List approved sender IDs usable as *From* |
 | **Custom Field** | Get Many | List the workspace's custom-field slots and labels |
 | **Credit** | Get Balance | Get the current credit balance |
+| **Inbound Message** | Get Many | List SMS replies received on your virtual number (paginated, optional *Received Since*) |
+| **Virtual Number** | Get | Get your dedicated virtual number and its billing state |
 
 ## Credentials
 
@@ -48,9 +50,13 @@ Requires n8n 1.x. Tested against the Sendy `/api/v1` public API.
 ## Usage
 
 - **Billing:** 1 credit per message per 201 characters, any encoding. Check the balance with *Credit → Get Balance* before bulk sends.
-- **Senders:** only **approved** senders work as *From*. The *From* field is populated from your approved senders.
-- **Send mode:** *Marketing* skips recipients unsubscribed in your workspace (no charge for them); *Transactional* declares the message isn't marketing and skips that check. Omit it to use your workspace default.
+- **Message length:** hard limit **603 characters** (3 credits). A longer body is rejected with `MESSAGE_TOO_LONG` — past that length the SMS gateway silently truncates on the wire, so Sendy refuses instead of charging you for a message that arrives cut short.
+- **Senders:** only **approved** senders work as *From*, and the value is matched **literally** — always pick from the dropdown, because a re-typed `0532740000` is rejected as `SENDER_NOT_APPROVED` even when it is your own number. If your workspace holds a Sendy **virtual number** it appears in the list as a `+972…` phone number: send from it and recipients can reply.
+- **Send mode:** *Marketing* **rejects** the send (403, nothing charged) when the recipient unsubscribed from your workspace (`RECIPIENT_UNSUBSCRIBED`) or is on its blocked-numbers list (`RECIPIENT_BLOCKED`) — it does not silently skip. *Transactional* declares the message isn't marketing and skips both checks. Omit it to use your workspace default.
+- **Other rejections:** `CONTENT_FLAGGED` (422 — the body matched the platform's restricted-content policy, nothing charged) and `ACCOUNT_UNDER_REVIEW` (403 — a new account may only send to its own verified sender number until the review completes).
+- **Inbound replies:** *Inbound Message → Get Many* returns messages **oldest first** with cursor pagination. `opt_out: "detected"` means Sendy already unsubscribed that sender automatically (`opt_out_applied_at` says when); `"suspected"` is a removal word inside a longer message, flagged in the Sendy app but never auto-applied. To poll for new replies, run it on a **Schedule** trigger with *Received Since* set to your last run. A long inbound message arrives as one item per SMS part — the gateway does not reassemble them.
 - **Contacts:** upsert matches on phone. On an existing contact, blank/omitted fields keep their current value and segments are only added. Provide at least one segment when creating a new contact. Israeli phone numbers are normalized automatically.
+- **Rate limit:** 60 requests/minute per API key.
 
 ## Resources
 

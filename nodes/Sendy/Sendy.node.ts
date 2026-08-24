@@ -6,6 +6,8 @@ import { segmentDescription } from './resources/segment';
 import { senderDescription } from './resources/sender';
 import { customFieldDescription } from './resources/customField';
 import { creditDescription } from './resources/credit';
+import { inboundDescription } from './resources/inbound';
+import { virtualNumberDescription } from './resources/virtualNumber';
 
 import { getSenders } from './loadOptions/getSenders';
 import { getSegments } from './loadOptions/getSegments';
@@ -18,7 +20,7 @@ export class Sendy implements INodeType {
 		group: ['output'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Send SMS and manage contacts, segments and credits with Sendy',
+		description: 'Send SMS, read replies to your virtual number, and manage contacts, segments and credits with Sendy',
 		defaults: {
 			name: 'Sendy',
 		},
@@ -67,6 +69,10 @@ export class Sendy implements INodeType {
 						value: 'customField',
 					},
 					{
+						name: 'Inbound Message',
+						value: 'inbound',
+					},
+					{
 						name: 'Message',
 						value: 'message',
 					},
@@ -78,6 +84,10 @@ export class Sendy implements INodeType {
 						name: 'Sender',
 						value: 'sender',
 					},
+					{
+						name: 'Virtual Number',
+						value: 'virtualNumber',
+					},
 				],
 				default: 'message',
 			},
@@ -87,6 +97,8 @@ export class Sendy implements INodeType {
 			...senderDescription,
 			...customFieldDescription,
 			...creditDescription,
+			...inboundDescription,
+			...virtualNumberDescription,
 		],
 	};
 

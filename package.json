@@ -1,7 +1,7 @@
 {
 	"name": "n8n-nodes-sendy",
-	"version": "0.1.2",
-	"description": "n8n community node for Sendy — send SMS and manage contacts, segments, senders and credits via the Sendy public API.",
+	"version": "0.2.0",
+	"description": "n8n community node for Sendy — send SMS, read inbound replies to your virtual number, and manage contacts, segments, senders and credits via the Sendy public API.",
 	"license": "MIT",
 	"homepage": "https://sendy.co.il",
 	"keywords": [
