@@ -27,7 +27,7 @@ export const contactCreateOrUpdateDescription: INodeProperties[] = [
 		default: [],
 		displayOptions: { show: showOnlyForContactUpsert },
 		description:
-			'Segments to add the contact to. Required (at least one) when creating a new contact; on an existing contact segments are only added, never removed. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'Segments to add the contact to. Required (at least one) when creating a new subscribed contact (optional with Unsubscribe); on an existing contact segments are only added, never removed. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		routing: {
 			send: { type: 'body', property: 'segments' },
 		},
@@ -98,6 +98,15 @@ export const contactCreateOrUpdateDescription: INodeProperties[] = [
 				default: '',
 				description: 'The contact last name (max 20 characters)',
 				routing: { send: { type: 'body', property: 'last_name' } },
+			},
+			{
+				displayName: 'Unsubscribe',
+				name: 'unsubscribe',
+				type: 'boolean',
+				default: true,
+				description:
+					'Whether to mark the number as unsubscribed (opted out). Works for a new number too, which is then created already unsubscribed and also added to the workspace blocklist. Sendy never re-subscribes a contact through the API; that is done in the Sendy app.',
+				routing: { send: { type: 'body', property: 'subscribed', value: '={{ $value === true ? false : undefined }}' } },
 			},
 		],
 	},
