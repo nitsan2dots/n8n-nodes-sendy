@@ -19,7 +19,7 @@ export async function sendyApiRequest(
 	qs: IDataObject = {},
 	body: IDataObject | undefined = undefined,
 ): Promise<IDataObject> {
-	const credentials = await this.getCredentials('sendyApi');
+	const credentials = await this.getCredentials('sendySmsApi');
 	const baseUrl = (credentials.baseUrl as string).replace(/\/$/, '');
 
 	const options: IHttpRequestOptions = {
@@ -32,7 +32,7 @@ export async function sendyApiRequest(
 
 	return (await this.helpers.httpRequestWithAuthentication.call(
 		this,
-		'sendyApi',
+		'sendySmsApi',
 		options,
 	)) as IDataObject;
 }

@@ -14,7 +14,7 @@ import { getSegments } from './loadOptions/getSegments';
 
 export class Sendy implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Sendy',
+		displayName: 'Sendy SMS',
 		name: 'sendy',
 		icon: { light: 'file:../../icons/sendy.svg', dark: 'file:../../icons/sendy.dark.svg' },
 		group: ['output'],
@@ -22,7 +22,7 @@ export class Sendy implements INodeType {
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: 'Send SMS, read replies to your virtual number, and manage contacts, segments and credits with Sendy',
 		defaults: {
-			name: 'Sendy',
+			name: 'Sendy SMS',
 		},
 		usableAsTool: true,
 		// Use the 'main' string literal, NOT NodeConnectionTypes.Main. In a multi-community-node
@@ -38,7 +38,7 @@ export class Sendy implements INodeType {
 		outputs: ['main'],
 		credentials: [
 			{
-				name: 'sendyApi',
+				name: 'sendySmsApi',
 				required: true,
 			},
 		],

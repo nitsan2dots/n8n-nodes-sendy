@@ -34,7 +34,7 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/SendyApi.credentials.js"
+			"dist/credentials/SendySmsApi.credentials.js"
 		],
 		"nodes": [
 			"dist/nodes/Sendy/Sendy.node.js"
@@ -49,5 +49,8 @@
 	},
 	"peerDependencies": {
 		"n8n-workflow": "*"
+	},
+	"auto-changelog": {
+		"breakingPattern": "BREAKING CHANGE:"
 	}
 }

@@ -1,6 +1,6 @@
 # n8n-nodes-sendy
 
-This is an n8n community node. It lets you use [Sendy](https://sendy.co.il) in your n8n workflows.
+This is an n8n community node. It lets you use [Sendy](https://sendy.co.il) in your n8n workflows. In the n8n editor it appears as **Sendy SMS**.
 
 Sendy is a credit-based SMS marketing platform for the Israeli market — send SMS, read the replies people send back to your virtual number, and manage contacts, segments and senders from your automations.
 
@@ -11,6 +11,8 @@ Sendy is a credit-based SMS marketing platform for the Israeli market — send S
 [Credentials](#credentials)  
 [Compatibility](#compatibility)  
 [Usage](#usage)  
+[Example workflows](#example-workflows)  
+[Upgrading to 0.4.0](#upgrading-to-040)  
 [Resources](#resources)
 
 ## Installation
@@ -38,7 +40,7 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 You need a Sendy account and an API key.
 
 1. In Sendy, open **Developers** and create an API key (it starts with `sk_live_`).
-2. In n8n, create a **Sendy API** credential and paste the key.
+2. In n8n, create a **Sendy SMS API** credential and paste the key.
 3. Leave **Base URL** as `https://sendy.co.il/api/v1` for production (change it only to point at a staging or self-hosted instance).
 
 The credential is validated against `GET /credits` when you save it.
@@ -58,6 +60,37 @@ Requires n8n 1.x. Tested against the Sendy `/api/v1` public API.
 - **Inbound replies:** *Inbound Message → Get Many* returns messages **oldest first** with cursor pagination. `opt_out: "detected"` means Sendy already unsubscribed that sender automatically (`opt_out_applied_at` says when); `"suspected"` is a removal word inside a longer message, flagged in the Sendy app but never auto-applied. To poll for new replies, run it on a **Schedule** trigger with *Received Since* set to your last run. A long inbound message arrives as one item per SMS part — the gateway does not reassemble them.
 - **Contacts:** upsert matches on phone. On an existing contact, blank/omitted fields keep their current value and segments are only added. Provide at least one segment when creating a new contact. Israeli phone numbers are normalized automatically.
 - **Rate limit:** 60 requests/minute per API key.
+
+## Example workflows
+
+**Send a one-time code from a webhook.** Your app calls an n8n webhook with a phone number and a code.
+
+1. **Webhook** trigger (POST), body `{ "phone": "0501234567", "code": "482913" }`.
+2. **Sendy SMS → Message → Send**: *To* `{{ $json.body.phone }}`, *Sender* picked from the dropdown, *Message* `Your verification code is {{ $json.body.code }}`. Under *Additional Fields* set *Mode* to *Transactional* (a code is not marketing, so opt-outs do not block it) and *Idempotency Key* to `otp-{{ $json.body.phone }}-{{ $json.body.code }}`, so a retried webhook never sends or charges twice.
+3. **Respond to Webhook** with the returned message ID, if your app wants to check its status later with *Message → Get*.
+
+**Sync an opt-out from your CRM.** When someone opts out of SMS in your CRM, opt them out in Sendy too.
+
+1. Your CRM's trigger node (or a **Webhook** your CRM calls) fires when a contact's SMS consent is removed.
+2. **Sendy SMS → Contact → Create or Update**: *Phone* from the CRM record, and under *Additional Fields* add *Unsubscribe* (on). Segments are optional here: a number that is not yet a Sendy contact is created already unsubscribed. Running it twice is safe.
+
+Marketing sends to that number are then rejected with `RECIPIENT_UNSUBSCRIBED`. Opting back in is done in the Sendy app, never through the API.
+
+**Poll inbound replies on a schedule.** Forward the replies to your virtual number to a team channel or a CRM every 15 minutes.
+
+1. **Schedule** trigger, every 15 minutes.
+2. **Sendy SMS → Inbound Message → Get Many**: *Return All* on, and under *Filters* set *Received Since* to `{{ $now.minus({ minutes: 15 }).toISO() }}`.
+3. Optionally an **If** node on `{{ $json.opt_out }}`: `detected` means Sendy already unsubscribed the sender, so route those separately.
+4. Your destination node (Slack, email, CRM note) with the sender's number and the message text.
+
+The window matches the schedule interval, so a reply is seen once. If a run can be skipped, store the last run time in workflow static data and use that instead.
+
+## Upgrading to 0.4.0
+
+0.4.0 renames the node to **Sendy SMS** and its credential to **Sendy SMS API** (credential type `sendySmsApi`, previously `sendyApi`), so they no longer collide with n8n's built-in Sendy email node. This is a **breaking change for existing installs**:
+
+- Existing workflows keep their Sendy SMS nodes (the node type is unchanged), but the nodes lose their credential.
+- After updating, create a new **Sendy SMS API** credential with your API key and select it in each Sendy SMS node. The old *Sendy API* credential can then be deleted.
 
 ## Resources
 

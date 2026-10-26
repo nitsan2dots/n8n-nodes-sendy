@@ -6,10 +6,10 @@ import type {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export class SendyApi implements ICredentialType {
-	name = 'sendyApi';
+export class SendySmsApi implements ICredentialType {
+	name = 'sendySmsApi';
 
-	displayName = 'Sendy API';
+	displayName = 'Sendy SMS API';
 
 	icon: Icon = { light: 'file:../icons/sendy.svg', dark: 'file:../icons/sendy.dark.svg' };
 
