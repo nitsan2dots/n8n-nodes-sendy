@@ -1,4 +1,5 @@
 import type { INodeType, INodeTypeDescription } from 'n8n-workflow';
+import { NodeConnectionTypes } from 'n8n-workflow';
 
 import { messageDescription } from './resources/message';
 import { contactDescription } from './resources/contact';
@@ -25,17 +26,18 @@ export class Sendy implements INodeType {
 			name: 'Sendy SMS',
 		},
 		usableAsTool: true,
-		// Use the 'main' string literal, NOT NodeConnectionTypes.Main. In a multi-community-node
-		// install, npm hoists the latest PUBLIC n8n-workflow (1.x) into ~/.n8n/nodes/node_modules,
-		// shadowing n8n's bundled 2.x. 1.x exports the singular `NodeConnectionType` but NOT the
-		// plural `NodeConnectionTypes`, so `NodeConnectionTypes.Main` reads `.Main` off undefined →
-		// TypeError at load, which n8n surfaces as "Class could not be found". The literal 'main'
-		// equals `.Main` in every version and needs no runtime symbol (the import above is type-only,
-		// so the compiled node never `require`s n8n-workflow at all). See docs/integrations/n8n-node.md.
-		// eslint-disable-next-line @n8n/community-nodes/node-connection-type-literal
-		inputs: ['main'],
-		// eslint-disable-next-line @n8n/community-nodes/node-connection-type-literal
-		outputs: ['main'],
+		// `NodeConnectionTypes.Main` with a `'main'` fallback, kept as an expression on purpose.
+		// The scanner gate (node-connection-type-literal) forbids the bare 'main' literal that
+		// 0.1.1 to 0.4.0 used, but a bare `NodeConnectionTypes.Main` still breaks one real install
+		// shape: n8n before 1.100 installed community nodes with a plain `npm install` in
+		// ~/.n8n/nodes, which hoisted the peer n8n-workflow there, and that copy outlives upgrades.
+		// Old copies (1.82.0 checked) export only the singular `NodeConnectionType`, so `.Main` would
+		// be read off undefined at load and n8n reports "Class could not be found". n8n 1.100+ strips
+		// peer dependencies on install, and n8n-workflow 1.120 and every 2.x export the plural, so
+		// the fallback only fires on such leftovers; 'main' equals `.Main` in every version.
+		// See docs/integrations/n8n-node.md in the Sendy repo.
+		inputs: [NodeConnectionTypes?.Main ?? 'main'],
+		outputs: [NodeConnectionTypes?.Main ?? 'main'],
 		credentials: [
 			{
 				name: 'sendySmsApi',
