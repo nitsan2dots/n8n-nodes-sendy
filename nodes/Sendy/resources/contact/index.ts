@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { sendyRouting } from '../../shared/errors';
 import { contactCreateOrUpdateDescription } from './createOrUpdate';
 import { contactGetDescription } from './get';
 import { contactGetManyDescription } from './getAll';
@@ -20,36 +21,30 @@ export const contactDescription: INodeProperties[] = [
 				value: 'createOrUpdate',
 				action: 'Create or update a contact',
 				description: 'Create a contact, or update it if the phone number already exists',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/contacts',
-					},
-				},
+				routing: sendyRouting({
+					method: 'POST',
+					url: '/contacts',
+				}),
 			},
 			{
 				name: 'Get',
 				value: 'get',
 				action: 'Get a contact',
 				description: 'Get a single contact by ID',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '=/contacts/{{$parameter.contactId}}',
-					},
-				},
+				routing: sendyRouting({
+					method: 'GET',
+					url: '=/contacts/{{$parameter.contactId}}',
+				}),
 			},
 			{
 				name: 'Get Many',
 				value: 'getAll',
 				action: 'Get many contacts',
 				description: 'Get many contacts, or look one up by phone',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/contacts',
-					},
-				},
+				routing: sendyRouting({
+					method: 'GET',
+					url: '/contacts',
+				}),
 			},
 		],
 		default: 'createOrUpdate',

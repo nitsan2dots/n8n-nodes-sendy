@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { sendyRouting } from '../../shared/errors';
 
 const showOnlyForSegments = {
 	resource: ['segment'],
@@ -17,20 +18,10 @@ export const segmentDescription: INodeProperties[] = [
 				value: 'getAll',
 				action: 'Get many segments',
 				description: 'List the workspace active segments with their member counts',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/segments',
-					},
-					output: {
-						postReceive: [
-							{
-								type: 'rootProperty',
-								properties: { property: 'segments' },
-							},
-						],
-					},
-				},
+				routing: sendyRouting(
+					{ method: 'GET', url: '/segments' },
+					[{ type: 'rootProperty', properties: { property: 'segments' } }],
+				),
 			},
 		],
 		default: 'getAll',

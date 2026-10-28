@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { sendyRouting } from '../../shared/errors';
 
 const showOnlyForInbound = {
 	resource: ['inbound'],
@@ -22,12 +23,10 @@ export const inboundDescription: INodeProperties[] = [
 				value: 'getAll',
 				action: 'Get many inbound messages',
 				description: 'List SMS replies received on the workspace virtual number',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/inbound',
-					},
-				},
+				routing: sendyRouting({
+					method: 'GET',
+					url: '/inbound',
+				}),
 			},
 		],
 		default: 'getAll',

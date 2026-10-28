@@ -60,6 +60,7 @@ Requires n8n 1.x. Tested against the Sendy `/api/v1` public API.
 - **Inbound replies:** *Inbound Message → Get Many* returns messages **oldest first** with cursor pagination. `opt_out: "detected"` means Sendy already unsubscribed that sender automatically (`opt_out_applied_at` says when); `"suspected"` is a removal word inside a longer message, flagged in the Sendy app but never auto-applied. To poll for new replies, run it on a **Schedule** trigger with *Received Since* set to your last run. A long inbound message arrives as one item per SMS part — the gateway does not reassemble them.
 - **Contacts:** upsert matches on phone. On an existing contact, blank/omitted fields keep their current value and segments are only added. Provide at least one segment when creating a new contact. Israeli phone numbers are normalized automatically.
 - **Rate limit:** 60 requests/minute per API key.
+- **Errors:** a rejected request fails with Sendy's own code and message, for example `SENDER_NOT_APPROVED: "from" is not an approved sender ...`. With *On Error* set to *Continue* (either output), that text is in `$json.error`, so a Stop and Error or IF node can quote or match the code. The HTTP status is the error's `httpCode`, shown in the node's error details. Only `INVALID_API_KEY` (401) means the credential is wrong. All codes are listed in the Errors chapter of [sendy.co.il/docs](https://sendy.co.il/docs).
 
 ## Example workflows
 

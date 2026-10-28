@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { sendyRouting } from '../../shared/errors';
 
 const showOnlyForCredits = {
 	resource: ['credit'],
@@ -17,12 +18,10 @@ export const creditDescription: INodeProperties[] = [
 				value: 'get',
 				action: 'Get the credit balance',
 				description: 'Get the current workspace credit balance',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/credits',
-					},
-				},
+				routing: sendyRouting({
+					method: 'GET',
+					url: '/credits',
+				}),
 			},
 		],
 		default: 'get',

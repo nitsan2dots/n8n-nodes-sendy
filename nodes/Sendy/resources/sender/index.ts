@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { sendyRouting } from '../../shared/errors';
 
 const showOnlyForSenders = {
 	resource: ['sender'],
@@ -17,20 +18,10 @@ export const senderDescription: INodeProperties[] = [
 				value: 'getAll',
 				action: 'Get many senders',
 				description: 'List the workspace approved sender IDs usable as From',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/senders',
-					},
-					output: {
-						postReceive: [
-							{
-								type: 'rootProperty',
-								properties: { property: 'senders' },
-							},
-						],
-					},
-				},
+				routing: sendyRouting(
+					{ method: 'GET', url: '/senders' },
+					[{ type: 'rootProperty', properties: { property: 'senders' } }],
+				),
 			},
 		],
 		default: 'getAll',

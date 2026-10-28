@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { sendyRouting } from '../../shared/errors';
 import { messageSendDescription } from './send';
 import { messageGetDescription } from './get';
 
@@ -19,24 +20,20 @@ export const messageDescription: INodeProperties[] = [
 				value: 'send',
 				action: 'Send an SMS',
 				description: 'Send a single SMS message',
-				routing: {
-					request: {
-						method: 'POST',
-						url: '/messages',
-					},
-				},
+				routing: sendyRouting({
+					method: 'POST',
+					url: '/messages',
+				}),
 			},
 			{
 				name: 'Get',
 				value: 'get',
 				action: 'Get a message',
 				description: 'Get the status of a sent message',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '=/messages/{{$parameter.messageId}}',
-					},
-				},
+				routing: sendyRouting({
+					method: 'GET',
+					url: '=/messages/{{$parameter.messageId}}',
+				}),
 			},
 		],
 		default: 'send',

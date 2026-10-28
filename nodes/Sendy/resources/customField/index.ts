@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { sendyRouting } from '../../shared/errors';
 
 const showOnlyForCustomFields = {
 	resource: ['customField'],
@@ -17,20 +18,10 @@ export const customFieldDescription: INodeProperties[] = [
 				value: 'getAll',
 				action: 'Get many custom fields',
 				description: 'List the workspace active custom field slots and their labels',
-				routing: {
-					request: {
-						method: 'GET',
-						url: '/custom-fields',
-					},
-					output: {
-						postReceive: [
-							{
-								type: 'rootProperty',
-								properties: { property: 'custom_fields' },
-							},
-						],
-					},
-				},
+				routing: sendyRouting(
+					{ method: 'GET', url: '/custom-fields' },
+					[{ type: 'rootProperty', properties: { property: 'custom_fields' } }],
+				),
 			},
 		],
 		default: 'getAll',
